@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tempahan Kain Batik Rasmi Ameerah Malaysia</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f7f3ee;margin:0;color:#222}
+.wrap{max-width:620px;margin:auto;padding:20px}
+.card{background:white;border-radius:18px;padding:22px;box-shadow:0 4px 18px #0001;margin:14px 0}
+h1{font-size:26px;text-align:center;margin:5px 0 10px}
+.tag{text-align:center;font-weight:700;margin-bottom:18px}
+.price{font-size:25px;font-weight:800;text-align:center;margin:12px}
+label{display:block;font-weight:700;margin:14px 0 6px}
+input,select{width:100%;box-sizing:border-box;padding:13px;border:1px solid #ccc;border-radius:10px;font-size:16px}
+button{width:100%;padding:14px;border:0;border-radius:10px;background:#138a55;color:white;font-size:17px;font-weight:800;margin-top:18px}
+.total{font-size:20px;font-weight:800;text-align:center;margin-top:18px}
+.small{font-size:13px;color:#666;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Tempahan Kain Batik Rasmi Ameerah Malaysia</h1>
+    <div class="tag">Ameerah Sahabat Wanita Muda.</div>
+    <p class="small">Kain batik rasmi Ameerah Malaysia</p>
+    <div class="price">RM130 / helai</div>
+  </div>
+  <div class="card">
+    <form id="orderForm">
+      <label>Nama Penerima</label>
+      <input id="name" required>
+      <label>No. Telefon</label>
+      <input id="phone" type="tel" required>
+      <label>Ameerah Negeri</label>
+      <select id="state" required>
+        <option value="">-- Pilih Negeri --</option>
+        <option>Johor</option><option>Kedah</option><option>Kelantan</option>
+        <option>Melaka</option><option>Negeri Sembilan</option><option>Pahang</option>
+        <option>Perak</option><option>Perlis</option><option>Penang</option>
+        <option>Sabah</option><option>Sarawak</option><option>Selangor</option>
+        <option>Terengganu</option><option>Wilayah Persekutuan Kuala Lumpur</option>
+        <option>Wilayah Persekutuan Labuan</option><option>Wilayah Persekutuan Putrajaya</option>
+      </select>
+      <label>Bilangan Order</label>
+      <input id="qty" type="number" min="1" value="1" required oninput="calc()">
+      <div class="total">Jumlah: RM<span id="total">130</span></div>
+      <button type="submit">Hantar Tempahan</button>
+      <p id="status" class="small"></p>
+    </form>
+  </div>
+</div>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZf1oGVPZhb6T3O3Ype5dec2xSNlN41FNq9kpebke0vle1jHeFPapOmodgY2lwROlt/exec";
+const PRICE = 130;
+function calc(){
+  const q=Math.max(1,Number(document.getElementById('qty').value||1));
+  document.getElementById('total').textContent=(q*PRICE).toFixed(0);
+}
+function makeOrderId(){
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  return 'AM-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds());
+}
+document.getElementById('orderForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const name=document.getElementById('name').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  const state=document.getElementById('state').value;
+  const qty=Math.max(1,Number(document.getElementById('qty').value||1));
+  const total=qty*PRICE, orderId=makeOrderId();
+  const status=document.getElementById('status');
+  status.textContent='Menghantar tempahan...';
+
+  const iframe=document.createElement('iframe');
+  iframe.name='sheetTarget'; iframe.style.display='none';
+  document.body.appendChild(iframe);
+
+  const form=document.createElement('form');
+  form.method='POST'; form.action=SCRIPT_URL; form.target='sheetTarget'; form.style.display='none';
+  const fields={order_id:orderId,name:name,phone:phone,state:state,qty:qty,total:total};
+  for(const [k,v] of Object.entries(fields)){
+    const input=document.createElement('input');
+    input.name=k; input.value=v; form.appendChild(input);
+  }
+  document.body.appendChild(form);
+  form.submit();
+
+  const msg='TEMPAHAN KAIN BATIK RASMI AMEERAH MALAYSIA\n\n'
+    +'No. Tempahan: '+orderId+'\n'
+    +'Nama Penerima: '+name+'\n'
+    +'No. Telefon: '+phone+'\n'
+    +'Ameerah Negeri: '+state+'\n'
+    +'Bilangan Order: '+qty+' helai\n'
+    +'Harga: RM130/helai\n'
+    +'Jumlah: RM'+total+'\n\n'
+    +'Terima kasih.';
+  status.textContent='Tempahan dihantar. Membuka WhatsApp...';
+  setTimeout(()=>window.open('https://wa.me/60108697187?text='+encodeURIComponent(msg),'_blank'),700);
+});
+</script>
+</body>
+</html>
